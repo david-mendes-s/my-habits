@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  next-app:
+    container_name: next-app
+    build: .
+    volumes:
+      - .:/app
+    restart: always
+    ports:
+      - 3000:3000
+
+  db:
+    image: postgres
+    restart: always
+    container_name: database-my-habits
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: db-my-habits
+      POSTGRES_PASSWORD: qwe12345
+    ports:
+      - 5432:5432
+    volumes:
+      - pgdata:/var/lib/postgresql/data    
+
+volumes:
+  pgdata:
+    driver: local

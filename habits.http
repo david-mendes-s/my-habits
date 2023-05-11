@@ -1,0 +1,9 @@
+###
+POST http://localhost:3000/api/server/hello
+content-type: application/json;
+
+{
+    "title": "Ler",
+    "description": "Ler pelo menos 30 minutos todos os dias"
+}
+###
