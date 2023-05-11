@@ -3,7 +3,8 @@ import {BsBell} from 'react-icons/bs';
 import styles from './Header.module.css';
 import { Nunito } from 'next/font/google';
 import Image from 'next/image';
-import { CreateHabitModal } from '../modal/CreateHabitModal';
+//import { CreateHabitModal } from '../modal/CreateHabitModal';
+import { ModalTest } from '../modal/ModelTest';
 import { useState } from 'react';
 
 const nunito = Nunito({ subsets: ['latin'], variable: '--font-nunito', })
@@ -40,7 +41,7 @@ export default function Header({session}:any) {
             </div>
             </div>
 
-            <CreateHabitModal closeModal={closeModal} modalIsOpen={modalIsOpen}/>
+            <ModalTest closeModal={closeModal} modalIsOpen={modalIsOpen}/>
         </div>
     );
 }

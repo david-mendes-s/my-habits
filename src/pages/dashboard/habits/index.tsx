@@ -7,48 +7,16 @@ import { Session, getServerSession } from "next-auth";
 import { authOptions } from "@/pages/api/auth/[...nextauth]";
 import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
+import { useHabits } from "@/hooks/useHabits";
 
 type SessionProps = {
   session: Session | null
 }
 
-interface IhabitsProps {
-  
-  title:string,
-  id:string,
-  userId: string,
-  DayHabit: [{
-    id: number,
-    day: string,
-    check: boolean
-  }]
-   
-}
-
 export default function Habits({session}:SessionProps){ 
 
-  const [habits, setHabits] = useState<IhabitsProps[]>([]);
+  const {habits} = useHabits();
 
-  useEffect(() => {
-    async function fetchHabits() {
-      const response = await api.get('/server/habits');
-      setHabits(response.data);
-    }
-    fetchHabits();
-  }, []);
-
- /*  const currentDate = new Date(); // Obtém a data atual
-
-  const filteredHabits = habits.filter(habit =>
-    habit.DayHabit.some(day => {
-      const dayDate = new Date(day.day);
-      return dayDate.getDate() === currentDate.getDate() &&
-            dayDate.getMonth() === currentDate.getMonth() &&
-            dayDate.getFullYear() === currentDate.getFullYear();
-    })
-  ); */
-
-  
     return(
       <Dashboard auth={session}>
         <div className={styles.habits}>
