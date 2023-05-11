@@ -6,10 +6,8 @@
 .pnp.js
 
 
-
 # testing
 /coverage
-/hooks
 
 # next.js
 /.next/
