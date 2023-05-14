@@ -68,7 +68,7 @@ model Habit {
 
 model Day {
   id       String     @id @default(uuid())
-  date     DateTime
+  date     String
   DayHabit DayHabit[]
 }
 

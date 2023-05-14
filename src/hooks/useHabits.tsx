@@ -18,7 +18,7 @@ interface IhabitsProps {
     id: string,
     habit_id:string,
     title: string,
-    date: IDays[]
+    date: string[]
 }
 
 interface HabitsContextData {
@@ -111,7 +111,7 @@ export function HabitsProvider({children}:IHabitsProvider){
     }
 
     function handleParseDay() {
-      const arrayDates: Date[] = [];
+      const arrayDates: string[] = [];
 
       console.log(days)
     
@@ -125,24 +125,24 @@ export function HabitsProvider({children}:IHabitsProvider){
 
           let d = new Date();
           d.setHours(0, 0, 0, 0); // Define as horas, minutos, segundos e milissegundos para zero
-          console.log(`${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`);
-          
+          //console.log(`${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`);
+          let dayOffFusoHorario = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
           //console.log(`${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`);
           
 
           if(day.check === true){
 
           if (day.id === weekDay) {
-            const currentDateString = date;
+            const currentDateString = dayOffFusoHorario;
             arrayDates.push(currentDateString);
           } else if (weekDay > day.id) { // Se o dia da semana atual é maior que o dia da semana recebido
             const diffDays = weekDay - day.id; // Diferença entre o dia da semana atual e o dia da semana recebido
-            const targetDate = dayjs(date).add((7 - diffDays), 'days')
-            arrayDates.push(targetDate.toDate());
+            const targetDate = dayjs(date).add((7 - diffDays), 'days').toDate();
+            arrayDates.push(`${targetDate.getFullYear()}-${pad(targetDate.getMonth() + 1)}-${pad(targetDate.getDate())}T${pad(targetDate.getHours())}:${pad(targetDate.getMinutes())}:${pad(targetDate.getSeconds())}`);
           } else if (weekDay < day.id) { // Se o dia da semana atual é menor que o dia da semana recebido
             const diffDays = day.id - weekDay; // Diferença entre o dia da semana atual e o dia da semana recebido
-            const targetDate = dayjs(date).add(diffDays, 'days')
-            arrayDates.push(targetDate.toDate());
+            const targetDate = dayjs(date).add(diffDays, 'days').toDate();
+            arrayDates.push(`${targetDate.getFullYear()}-${pad(targetDate.getMonth() + 1)}-${pad(targetDate.getDate())}T${pad(targetDate.getHours())}:${pad(targetDate.getMinutes())}:${pad(targetDate.getSeconds())}`);
           }
         }
 

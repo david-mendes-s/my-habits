@@ -4,7 +4,6 @@ import type { NextApiRequest, NextApiResponse } from 'next'
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../auth/[...nextauth]';
 import { prisma } from '@/lib/prisma';
-import dayjs from 'dayjs';
 import { Prisma } from '@prisma/client';
 
 export default async function handler(
@@ -65,24 +64,26 @@ export default async function handler(
     let mes = new Date().getMonth()+1;
     let ano = new Date().getFullYear();
 
-    let data = `${ano}-${mes}-${dia} 03:00:00.000`
+    const mesFormat = () => {
+      if(mes < 10){
+        return `0${mes}`
+      }
+      return mes
+    }
 
-    const now = dayjs().toDate();
-    const date = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
+    let data = `${ano}-${mesFormat()}-${dia}T00:00:00`
 
-    
- 
     const listHabits = await prisma.$queryRaw(
       Prisma.sql`
         SELECT dh.id, dh.habit_id, dh.day_id, dh.completed, h.title
         FROM "DayHabit" dh
         INNER JOIN "Habit" h ON dh."habit_id" = h."id"
         WHERE dh."day_id" IN (
-          SELECT "id" FROM "Day" WHERE "date" = ${new Date(data)}
+          SELECT "id" FROM "Day" WHERE "date" = ${data}
         ) AND h."userId" = ${user?.id}
       `
     );
 
-    return res.status(200).json([date, data]);
+    return res.status(200).json(listHabits);
   }
 }
