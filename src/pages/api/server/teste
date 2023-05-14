@@ -1,0 +1,32 @@
+    const session = await getServerSession(req, res, authOptions);
+    
+    if (!session) {
+      res.status(401).json({ message: 'Unauthorized' });
+      return;
+    }
+
+    const user = await prisma.user.findFirst({
+      where: {
+        email: session?.user?.email
+      } 
+    })
+
+    let dia = new Date().getDate();
+    let mes = new Date().getMonth()+1;
+    let ano = new Date().getFullYear();
+
+    let data = `${ano}-${mes}-${dia} 03:00:00.000`
+    
+    
+    const listHabits = await prisma.$queryRaw(
+      Prisma.sql`
+        SELECT dh.id, dh.habit_id, dh.day_id, dh.completed, h.title
+        FROM "DayHabit" dh
+        INNER JOIN "Habit" h ON dh."habit_id" = h."id"
+        WHERE dh."day_id" IN (
+          SELECT "id" FROM "Day" WHERE "date" = ${new Date(data)}
+        ) AND h."userId" = ${user?.id}
+      `
+    );
+      
+    return res.status(200).json(listHabits);

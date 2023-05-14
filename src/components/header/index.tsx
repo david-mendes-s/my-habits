@@ -6,11 +6,13 @@ import Image from 'next/image';
 //import { CreateHabitModal } from '../modal/CreateHabitModal';
 import { ModalTest } from '../modal/ModelTest';
 import { useState } from 'react';
+import { useHabits } from '@/hooks/useHabits';
 
 const nunito = Nunito({ subsets: ['latin'], variable: '--font-nunito', })
 
 export default function Header({session}:any) {
     const [modalIsOpen, setIsOpen] = useState(false);
+    const {countHabits} = useHabits();
     
     function openModal() {
         setIsOpen(true);
@@ -30,7 +32,7 @@ export default function Header({session}:any) {
                 </div>
                 <div className={styles.content_profile}>
                     <strong className={nunito.className}>Bem Vindo, {session.user.name}</strong>
-                    <p className={nunito.className}>Você tem <strong> 3 tarefas </strong>pendentes</p>
+                    <p className={nunito.className}>Você tem <strong> {countHabits} tarefas </strong>pendentes</p>
                 </div>
             </div>
             <div className={styles.actions_buttons}>

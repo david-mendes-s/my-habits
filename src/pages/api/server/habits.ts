@@ -4,6 +4,8 @@ import type { NextApiRequest, NextApiResponse } from 'next'
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../auth/[...nextauth]';
 import { prisma } from '@/lib/prisma';
+import dayjs from 'dayjs';
+import { Prisma } from '@prisma/client';
 
 export default async function handler(
   req: NextApiRequest,
@@ -24,6 +26,7 @@ export default async function handler(
         where: {
           email: session?.user?.email
         } 
+        
       })
   
       await prisma.habit.create({
@@ -44,7 +47,7 @@ export default async function handler(
     }catch(err){
      throw new Error('internal error') 
     }
-  }else {
+  }else if(req.method === 'GET'){
     const session = await getServerSession(req, res, authOptions);
     
     if (!session) {
@@ -58,24 +61,28 @@ export default async function handler(
       } 
     })
 
-    const listHabits = await prisma.habit.findMany({
-      where: {
-        user: {
-          id: user?.id // O ID do usuário que você deseja buscar
-        }
-      },
-      include: {
-        DayHabit: true // Carrega também os dias de cada hábito
-      }
-    });
+    let dia = new Date().getDate();
+    let mes = new Date().getMonth()+1;
+    let ano = new Date().getFullYear();
 
-    /* const listHabits = await prisma.$queryRaw`
-      SELECT h.*, dh.*
-      FROM habit h
-      LEFT JOIN dayHabit dh ON dh."habit_id" = h.id
-      WHERE h."userId" = ${user?.id} AND date_trunc('day', dh."date") = date_trunc('day', NOW())
-    `; */
+    let data = `${ano}-${mes}-${dia} 03:00:00.000`
+
+    const now = dayjs().toDate();
+    const date = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
+
     
-    return res.status(200).json(listHabits);
+ 
+    const listHabits = await prisma.$queryRaw(
+      Prisma.sql`
+        SELECT dh.id, dh.habit_id, dh.day_id, dh.completed, h.title
+        FROM "DayHabit" dh
+        INNER JOIN "Habit" h ON dh."habit_id" = h."id"
+        WHERE dh."day_id" IN (
+          SELECT "id" FROM "Day" WHERE "date" = ${new Date(data)}
+        ) AND h."userId" = ${user?.id}
+      `
+    );
+
+    return res.status(200).json([date, data]);
   }
 }

@@ -5,17 +5,20 @@ import { nunito } from "../../_app";
 import Dashboard from "../";
 import { Session, getServerSession } from "next-auth";
 import { authOptions } from "@/pages/api/auth/[...nextauth]";
-import { useEffect, useState } from "react";
-import { api } from "@/lib/api";
+
 import { useHabits } from "@/hooks/useHabits";
 
 type SessionProps = {
   session: Session | null
 }
 
+
+
 export default function Habits({session}:SessionProps){ 
 
   const {habits} = useHabits();
+
+ 
 
     return(
       <Dashboard auth={session}>
@@ -23,9 +26,9 @@ export default function Habits({session}:SessionProps){
                 <div className={styles.content_habits}>
                   <ul className={`${styles.list_habits} ${nunito.className}`}>
                     {habits.map(habit => (
-                        <li>
+                        <li key={habit.habit_id}>
                           <p>{habit.title}</p>
-                          <button className={styles.checklist}></button>
+                          <button className={styles.checklist} ></button>
                         </li>
                       ))}
                   </ul>

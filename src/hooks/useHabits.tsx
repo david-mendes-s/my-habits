@@ -15,6 +15,8 @@ interface IDays {
 }
 
 interface IhabitsProps {
+    id: string,
+    habit_id:string,
     title: string,
     date: IDays[]
 }
@@ -23,6 +25,7 @@ interface HabitsContextData {
     createHabits: (title:string, closeModal: () => void) => Promise<void>,
     handleDays: (day: IDays) => void,
     habits: IhabitsProps[],
+    countHabits: number,
 }
 
 const HabitsContext = createContext<HabitsContextData>({} as HabitsContextData );
@@ -31,7 +34,8 @@ export function HabitsProvider({children}:IHabitsProvider){
 
     const [habits, setHabits] = useState<IhabitsProps[]>([]);
     const [days, setDays] = useState<IDays[]>([]);
-
+    let countHabits = habits.length;
+    
     useEffect(()=>{
         days.map(day => {
           if(day.check === true){
@@ -43,30 +47,29 @@ export function HabitsProvider({children}:IHabitsProvider){
 
         async function fetchHabits() {
             const response = await api.get('/server/habits');
+            console.log(response.data)
             setHabits(response.data);
         }
+        
         fetchHabits();
+
+        countHabits = habits.length;
+
+
     }, [days]);
 
     async function createHabits(title:string, closeModal: () => void){
     
         const dates = handleParseDay();
+        console.log(dates);
     
         try{
-          const response = await api.post('http://localhost:3000/api/server/habits', {
+          await api.post('http://localhost:3000/api/server/habits', {
             title,
             dates
           });
     
-          const dataHabit = response.data;
-    
-          setHabits([dataHabit, ...habits])
-    
-          console.log(dataHabit);
-    
-          /* setTitle('');
           
-          ; */
           closeModal();
 
           setDays([]);
@@ -75,7 +78,7 @@ export function HabitsProvider({children}:IHabitsProvider){
         } 
     }
 
-    function handleParseDay() {
+    /* function handleParseDay() {
         const arrayDates: Date[] = [];
       
         days.map(day => {
@@ -102,7 +105,54 @@ export function HabitsProvider({children}:IHabitsProvider){
     
         return arrayDates;
         
+    } */
+    function pad(value:any) {
+      return value.toString().padStart(2, 0);
     }
+
+    function handleParseDay() {
+      const arrayDates: Date[] = [];
+
+      console.log(days)
+    
+      days.map(day => {
+  
+        if(day.check === true){
+          /* const parsedDate = dayjs(new Date()).startOf('day') */
+          const now = dayjs().toDate();
+          const date = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
+          const weekDay = date.getDay()
+
+          let d = new Date();
+          d.setHours(0, 0, 0, 0); // Define as horas, minutos, segundos e milissegundos para zero
+          console.log(`${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`);
+          
+          //console.log(`${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`);
+          
+
+          if(day.check === true){
+
+          if (day.id === weekDay) {
+            const currentDateString = date;
+            arrayDates.push(currentDateString);
+          } else if (weekDay > day.id) { // Se o dia da semana atual é maior que o dia da semana recebido
+            const diffDays = weekDay - day.id; // Diferença entre o dia da semana atual e o dia da semana recebido
+            const targetDate = dayjs(date).add((7 - diffDays), 'days')
+            arrayDates.push(targetDate.toDate());
+          } else if (weekDay < day.id) { // Se o dia da semana atual é menor que o dia da semana recebido
+            const diffDays = day.id - weekDay; // Diferença entre o dia da semana atual e o dia da semana recebido
+            const targetDate = dayjs(date).add(diffDays, 'days')
+            arrayDates.push(targetDate.toDate());
+          }
+        }
+
+      }
+
+      })
+      console.log(arrayDates+"ok")
+      return arrayDates;
+    } 
+  
 
     function handleDays(day: IDays){
         const busca = days.findIndex((array) => array.id === day.id);
@@ -121,7 +171,7 @@ export function HabitsProvider({children}:IHabitsProvider){
     }
 
     return(
-        <HabitsContext.Provider value={{createHabits, handleDays, habits}}>
+        <HabitsContext.Provider value={{createHabits, handleDays, habits, countHabits}}>
             {children}
         </HabitsContext.Provider>
     );
