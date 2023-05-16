@@ -25,6 +25,7 @@ interface IhabitsProps {
   habit_id: string;
   id: string;
   title: string;
+  date: string;
 }
 
 
