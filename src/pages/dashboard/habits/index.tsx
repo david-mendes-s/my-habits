@@ -8,9 +8,7 @@ import { authOptions } from "@/pages/api/auth/[...nextauth]";
 
 import { useHabits } from "@/hooks/useHabits";
 import { api } from "@/lib/api";
-import { prisma } from "@/lib/prisma";
-import dayjs from "dayjs";
-import { Prisma } from "@prisma/client";
+
 import { useEffect, useState } from "react";
 
 type SessionProps = {
@@ -23,6 +21,7 @@ interface IHabit {
   habit_id: string;
   id: string;
   title: string;
+  date:string;
 }
 
 
@@ -33,6 +32,8 @@ export default function Habits({session}:SessionProps){
   const [progress, setProgress] = useState(0);
   const [count, setCount] = useState(0);
   const [countCompleted, setCountCompleted] = useState(0);
+  const [habistCompleted, setHabitsCompleted] = useState<IHabit[]>([]);
+
 
   async function handleCountProgress(){
     const response = await api.get('http://localhost:3000/api/server/countHabits')
@@ -41,7 +42,7 @@ export default function Habits({session}:SessionProps){
   }
 
   
-  async function handleHabitComplet(habit:IHabit){
+  async function handleUpdateHabitComplet(habit:IHabit){
     console.log(habit)
 
     await api.put('http://localhost:3000/api/server/habits', {
@@ -53,9 +54,19 @@ export default function Habits({session}:SessionProps){
     
   }
 
+  async function handleHabitComplet(){
+    const response = await api.get('http://localhost:3000/api/server/habitsCompleted')
+
+    setHabitsCompleted(response.data);
+    console.log(habistCompleted)
+  }
+
+
+
   useEffect(()=> {
     handleCountProgress()
     setProgress(Number((countCompleted*100)/count))
+    handleHabitComplet()
   }, [count, countCompleted])
 
     return(
@@ -66,7 +77,7 @@ export default function Habits({session}:SessionProps){
                     {habits.map(habit => (
                         <li key={habit.habit_id}>
                           <p>{habit.title}</p>
-                          <button className={styles.checklist} onClick={()=> handleHabitComplet(habit)}></button>
+                          <button className={styles.checklist} onClick={()=> handleUpdateHabitComplet(habit)}></button>
                         </li>
                       ))}
                   </ul>
@@ -90,25 +101,21 @@ export default function Habits({session}:SessionProps){
                   <div className={styles.concluid_tasks}>
                     <h4 className={nunito.className}>Tarefas Concluídas</h4>
                     <ul>
-                      <li>
+                      {habistCompleted.map(completed => (
+                        <li>
                         <div className={styles.task_icon}>
                         💪
                         </div>
                         <div className={styles.details_task}>
-                          <strong className={nunito.className}>Treino</strong>
-                          <p className={nunito.className}>12 de março de 2023</p>
+                          <strong className={nunito.className}>{completed.title}</strong>
+                          <p className={nunito.className}>
+                            {new Intl.DateTimeFormat('pt-Br').format(
+                                 new Date(completed.date)
+                            )}
+                          </p>
                         </div>
                       </li>
-
-                      <li>
-                        <div className={styles.task_icon}>
-                        📚
-                        </div>
-                        <div className={styles.details_task}>
-                          <strong className={nunito.className}>{progress}</strong>
-                          <p className={nunito.className}>12 de março de 2023</p>
-                        </div>
-                      </li>
+                      ))}
                       
                     </ul>
                   </div>
