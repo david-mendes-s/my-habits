@@ -5,6 +5,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '../auth/[...nextauth]';
 import { prisma } from '@/lib/prisma';
 import { Prisma } from '@prisma/client';
+import dayjs from 'dayjs';
 
 export default async function handler(
   req: NextApiRequest,
@@ -47,6 +48,42 @@ export default async function handler(
      throw new Error('internal error') 
     }
   }else if(req.method === 'GET'){
+    try {
+      const session = await getServerSession(req, res, authOptions);
+    
+      if (!session) {
+        res.status(401).json({ message: 'Unauthorized' });
+        return;
+      }
+
+      const user = await prisma.user.findFirst({
+        where: {
+          email: session?.user?.email
+        } 
+      })
+
+
+      const data = dayjs.tz(new Date(), 'America/Sao_Paulo').startOf('day').toISOString();
+      
+
+      const listHabits = await prisma.$queryRaw(
+        Prisma.sql`
+          SELECT dh.id, dh.habit_id, dh.day_id, dh.completed, h.title
+          FROM "DayHabit" dh
+          INNER JOIN "Habit" h ON dh."habit_id" = h."id"
+          WHERE dh."day_id" IN (
+            SELECT "id" FROM "Day" WHERE "date" = ${data}
+          ) AND h."userId" = ${user?.id} AND dh.completed = false
+        `
+      );
+
+      return res.status(200).json(listHabits);
+    }catch {
+      throw new Error('internal error');
+    }
+    
+  
+  }else if(req.method === 'PUT'){
     const session = await getServerSession(req, res, authOptions);
     
     if (!session) {
@@ -54,36 +91,26 @@ export default async function handler(
       return;
     }
 
-    const user = await prisma.user.findFirst({
+    const data = req.body;
+
+    const habit = await prisma.dayHabit.findUnique({
       where: {
-        email: session?.user?.email
-      } 
-    })
-
-    let dia = new Date().getDate();
-    let mes = new Date().getMonth()+1;
-    let ano = new Date().getFullYear();
-
-    const mesFormat = () => {
-      if(mes < 10){
-        return `0${mes}`
+        id: data.habit.id
       }
-      return mes
-    }
+    })
+    
+  
+    if (!habit) {
+      res.status(401).json({ message: 'There is no such habit' });
+      return;
+    } 
 
-    let data = `${ano}-${mesFormat()}-${dia}T00:00:00`
+    await prisma.dayHabit.update({
+      where: { id: data.habit.id }, // ID do registro a ser atualizado
+      data: { completed: true }, // Valor atualizado do campo completed
+    });
+     
 
-    const listHabits = await prisma.$queryRaw(
-      Prisma.sql`
-        SELECT dh.id, dh.habit_id, dh.day_id, dh.completed, h.title
-        FROM "DayHabit" dh
-        INNER JOIN "Habit" h ON dh."habit_id" = h."id"
-        WHERE dh."day_id" IN (
-          SELECT "id" FROM "Day" WHERE "date" = ${data}
-        ) AND h."userId" = ${user?.id}
-      `
-    );
-
-    return res.status(200).json(listHabits);
+    return res.status(200).json({message: "update habit with sucess."});
   }
 }

@@ -8,10 +8,10 @@ export const nunito = Nunito({ subsets: ['latin'], variable: '--font-nunito', })
 
 export default function App({ Component, pageProps }: AppProps) {
   return(
-    <AuthProvider session={pageProps.session}>  
-      <HabitsProvider>
+    <HabitsProvider>
+      <AuthProvider session={pageProps.session}>  
         <Component {...pageProps} />
-      </HabitsProvider> 
-     </AuthProvider>
+      </AuthProvider>
+    </HabitsProvider> 
   );  
 }

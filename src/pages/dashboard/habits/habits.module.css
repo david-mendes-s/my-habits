@@ -94,7 +94,7 @@
     position: absolute;
     background-color: #5237E9;
     border-radius: 10px;
-    width: 70%;
+    /* width: 70%; */
     height: 100%;
     z-index: 1;
 }
