@@ -1,5 +1,6 @@
 .container {
     display: flex;
+    
 }
 
 .content {
@@ -11,6 +12,7 @@
 .habits {
     padding: 20px 0;
     display: flex;
+    flex-wrap: nowrap;
 }
 
 .content_habits {
@@ -187,4 +189,22 @@
 .details_task p {
     font-size: 12px;
     color: #737185;
+}
+
+
+
+@media(max-width: 580px){
+
+    .habits {
+        flex-wrap: wrap;
+        padding: 20px;
+    }
+    .content_habits{
+        height: 480px;
+    }
+    .content_sideBar{
+        width: 100%;
+        margin: 10px;
+    }
+    
 }

@@ -29,3 +29,41 @@
     border: 0;
     cursor: pointer;
 }
+
+.menu_botton{
+    display: none;
+}
+
+@media(max-width: 580px){
+    .container {
+        display: none;
+    }
+
+    .menu_botton{
+        display: flex;
+        align-items: center;
+        justify-content: space-around;
+        position: absolute;
+        bottom: 0;
+
+        width: calc(100% - 30px);
+        height: 60px;
+        background: #0B081C;
+
+        margin: 15px;
+        border-radius: 8px;
+
+        z-index: 100;
+    }
+
+    .menu_botton button{
+        border: 0;
+        background: transparent;
+
+        width: 30px;
+        height: 30px;
+
+        border-radius: 8px;
+        cursor: pointer;
+    }
+}

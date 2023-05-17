@@ -11,9 +11,9 @@ import { useHabits } from '@/hooks/useHabits';
 const nunito = Nunito({ subsets: ['latin'], variable: '--font-nunito', })
 
 export default function Header({session}:any) {
-    const [modalIsOpen, setIsOpen] = useState(false);
     const {countHabits} = useHabits();
-    
+    const [modalIsOpen, setIsOpen] = useState(false);
+      
     function openModal() {
         setIsOpen(true);
     }

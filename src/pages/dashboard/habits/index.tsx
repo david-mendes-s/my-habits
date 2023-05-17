@@ -122,6 +122,7 @@ export default function Habits({session}:SessionProps){
                     </ul>
                   </div>
                 </div>
+                
               </div>
       </Dashboard>
         

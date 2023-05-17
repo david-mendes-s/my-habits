@@ -2,6 +2,7 @@
 .container {
     padding-top: 20px;
     width: 100%;
+    
 }
 
 .content {
@@ -89,3 +90,33 @@
     color: #605E70;
     font-size: 14px;
  }
+
+
+@media(max-width: 580px){
+    .container {
+        position: sticky;
+        top: 0;
+        background: #FFF;
+    }
+    .content{
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .content_profile strong {
+        font-size: 14px;
+    }
+
+    .content_profile p {
+        font-size: 10px;
+    }
+
+    .content_profile strong:last-child{
+        font-size: 10px;
+    }
+
+    .actions_buttons button {
+        display: none;
+    }
+}

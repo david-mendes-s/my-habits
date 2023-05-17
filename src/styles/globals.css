@@ -29,4 +29,29 @@ a {
 }
 
 
+@media(max-width: 580px){ 
+  body{
+    overflow: scroll;
+    overflow-x: hidden;
+  }
+}
 
+::-webkit-scrollbar {
+  width: 5px; /* Largura da barra de rolagem */
+}
+
+/* Estilizando o trilho da barra de rolagem */
+body::-webkit-scrollbar-track {
+  background-color: #f1f1f1; /* Cor de fundo do trilho */
+}
+
+/* Estilizando o polegar da barra de rolagem */
+body::-webkit-scrollbar-thumb {
+  background-color: #5237E9; /* Cor do polegar */
+  border-radius: 5px;
+}
+
+/* Estilizando o polegar da barra de rolagem quando houver hover */
+body::-webkit-scrollbar-thumb:hover {
+  background-color: #2c10c7; /* Cor do polegar ao passar o mouse */
+}
