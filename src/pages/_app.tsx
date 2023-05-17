@@ -4,6 +4,13 @@ import {SessionProvider as AuthProvider} from 'next-auth/react';
 import { HabitsProvider } from '@/hooks/useHabits';
 import { Nunito, Poppins } from 'next/font/google';
 
+import utc from 'dayjs/plugin/utc';
+import timezone from 'dayjs/plugin/timezone';
+import dayjs from 'dayjs';
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
+
 
 export const nunito = Nunito({ subsets: ['latin'], variable: '--font-nunito', })
 

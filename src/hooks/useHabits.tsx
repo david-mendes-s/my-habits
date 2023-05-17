@@ -63,7 +63,7 @@ export function HabitsProvider({children}:IHabitsProvider){
   
     
     async function handleUpdateHabitComplet(habit:IhabitsProps){
-      console.log(habit)
+      //console.log(habit)
   
       await api.put('/server/habits', {
         habit

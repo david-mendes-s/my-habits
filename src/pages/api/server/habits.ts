@@ -7,6 +7,13 @@ import { prisma } from '@/lib/prisma';
 import { Prisma } from '@prisma/client';
 import dayjs from 'dayjs';
 
+import utc from 'dayjs/plugin/utc';
+import timezone from 'dayjs/plugin/timezone';
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
+
+
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
@@ -78,8 +85,8 @@ export default async function handler(
       );
 
       return res.status(200).json(listHabits);
-    }catch {
-      throw new Error('internal error');
+    }catch(err:any) {
+      throw new Error('internal error', err);
     }
     
   

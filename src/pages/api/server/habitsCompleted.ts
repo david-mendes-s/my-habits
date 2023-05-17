@@ -5,6 +5,13 @@ import { Prisma } from '@prisma/client';
 import { prisma } from "@/lib/prisma";
 import dayjs from "dayjs";
 
+import utc from 'dayjs/plugin/utc';
+import timezone from 'dayjs/plugin/timezone';
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
+
+
 export default async function handler(
     req: NextApiRequest,
     res: NextApiResponse
