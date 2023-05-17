@@ -28,8 +28,10 @@ interface IHabit {
 
 export default function Habits({session}:SessionProps){ 
 
-  const {habits, fetchHabits, countHabits} = useHabits();
-  const [progress, setProgress] = useState(0);
+  const {habits, fetchHabits, countHabits, progress, habistCompleted, handleUpdateHabitComplet} = useHabits();
+  //habistCompleted, handleUpdateHabitComplet, progress
+  
+  /* const [progress, setProgress] = useState(0);
   const [count, setCount] = useState(0);
   const [countCompleted, setCountCompleted] = useState(0);
   const [habistCompleted, setHabitsCompleted] = useState<IHabit[]>([]);
@@ -67,7 +69,7 @@ export default function Habits({session}:SessionProps){
     handleCountProgress()
     setProgress(Number((countCompleted*100)/count))
     handleHabitComplet()
-  }, [count, countCompleted])
+  }, [count, countCompleted]) */
 
     return(
       <Dashboard auth={session}>
@@ -102,7 +104,7 @@ export default function Habits({session}:SessionProps){
                     <h4 className={nunito.className}>Tarefas Concluídas</h4>
                     <ul>
                       {habistCompleted.map(completed => (
-                        <li>
+                        <li key={completed.id}>
                         <div className={styles.task_icon}>
                         💪
                         </div>

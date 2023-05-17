@@ -4,14 +4,27 @@ import {SessionProvider as AuthProvider} from 'next-auth/react';
 import { HabitsProvider } from '@/hooks/useHabits';
 import { Nunito, Poppins } from 'next/font/google';
 
+
 export const nunito = Nunito({ subsets: ['latin'], variable: '--font-nunito', })
 
-export default function App({ Component, pageProps }: AppProps) {
+export default function App({ Component, pageProps, router }: AppProps) {
+
+  const { pathname } = router;
+
+  // Verifica se é a página de login
+  const isLoginPage = pathname === '/';
+
   return(
-    <HabitsProvider>
-      <AuthProvider session={pageProps.session}>  
+    <>
+      {isLoginPage ? (
         <Component {...pageProps} />
-      </AuthProvider>
-    </HabitsProvider> 
+      ) : (
+        <AuthProvider session={pageProps.session}>
+          <HabitsProvider>
+            <Component {...pageProps} />
+          </HabitsProvider>
+        </AuthProvider>
+      )}
+    </>
   );  
 }

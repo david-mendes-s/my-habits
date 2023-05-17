@@ -34,7 +34,10 @@ interface HabitsContextData {
     handleDays: (day: IDays) => void,
     habits: IhabitsProps[],
     countHabits: number,
-    fetchHabits: () => Promise<void>
+    fetchHabits: () => Promise<void>,
+    progress: number,
+    habistCompleted: IhabitsProps[], 
+    handleUpdateHabitComplet: (habi:IhabitsProps) => Promise<void>, 
   }
 
 const HabitsContext = createContext<HabitsContextData>({} as HabitsContextData );
@@ -44,6 +47,40 @@ export function HabitsProvider({children}:IHabitsProvider){
     const [habits, setHabits] = useState<IhabitsProps[]>([]);
     const [days, setDays] = useState<IDays[]>([]);
     let countHabits = habits.length;
+
+    //inicio
+    const [progress, setProgress] = useState(0);
+    const [count, setCount] = useState(0);
+    const [countCompleted, setCountCompleted] = useState(0);
+    const [habistCompleted, setHabitsCompleted] = useState<IhabitsProps[]>([]);
+  
+  
+    async function handleCountProgress(){
+      const response = await api.get('/server/countHabits')
+      setCount(Number(response.data.count));
+      setCountCompleted(Number(response.data.countCompleted));
+    }
+  
+    
+    async function handleUpdateHabitComplet(habit:IhabitsProps){
+      console.log(habit)
+  
+      await api.put('/server/habits', {
+        habit
+      });
+  
+      fetchHabits();
+      handleCountProgress();
+      
+    }
+  
+    async function handleHabitComplet(){
+      const response = await api.get('/server/habitsCompleted')
+  
+      setHabitsCompleted(response.data);
+      console.log(habistCompleted)
+    }
+    //fim
 
     async function fetchHabits() {
       const response = await api.get('/server/habits');
@@ -64,8 +101,12 @@ export function HabitsProvider({children}:IHabitsProvider){
 
         countHabits = habits.length;
 
+        handleCountProgress()
+        setProgress(Number((countCompleted*100)/count))
+        handleHabitComplet()
 
-    }, [days]);
+
+    }, [days, count, countCompleted]);
 
     
 
@@ -75,7 +116,7 @@ export function HabitsProvider({children}:IHabitsProvider){
         //console.log(dates);
     
         try{
-          await api.post('http://localhost:3000/api/server/habits', {
+          await api.post('/server/habits', {
             title,
             dates
           });
@@ -164,7 +205,7 @@ export function HabitsProvider({children}:IHabitsProvider){
     }
 
     return(
-        <HabitsContext.Provider value={{createHabits, handleDays, habits, countHabits, fetchHabits}}>
+        <HabitsContext.Provider value={{createHabits, handleDays, habits, countHabits, fetchHabits, habistCompleted, handleUpdateHabitComplet, progress}}>
             {children}
         </HabitsContext.Provider>
     );
