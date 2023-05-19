@@ -9,7 +9,10 @@
     display: flex;
     align-items: center;
     justify-content: center ;
+<<<<<<< HEAD
     position: absolute;
+=======
+>>>>>>> feature/reponsive-dashboard-habits
     z-index: 99;
   }
   
