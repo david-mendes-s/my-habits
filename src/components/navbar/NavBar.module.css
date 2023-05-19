@@ -3,10 +3,13 @@
     max-width: 90px;
 
     padding: 10px 0 10px 10px;
+
+    
 }
 
 .content {
-    position: relative;
+    position: sticky;
+    top: 10px;
 
     display: flex;
     flex-direction: column;

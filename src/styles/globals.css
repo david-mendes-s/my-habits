@@ -29,14 +29,15 @@ a {
 }
 
 
-@media(max-width: 580px){ 
+
+@media(max-width: 1200px){ 
   body{
     overflow: scroll;
     overflow-x: hidden;
   }
 }
 
-::-webkit-scrollbar {
+body::-webkit-scrollbar {
   width: 5px; /* Largura da barra de rolagem */
 }
 
