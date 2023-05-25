@@ -58,12 +58,14 @@ model VerificationToken {
 }
 
 model Habit {
-  id          String     @id @default(uuid())
+  id          String          @id @default(uuid())
   title       String
   description String?
   userId      String
-  user        User       @relation(fields: [userId], references: [id])
+  created_at  DateTime
+  user        User            @relation(fields: [userId], references: [id])
   DayHabit    DayHabit[]
+  weekDays    HabitWeekDays[]
 }
 
 model Day {
@@ -80,4 +82,15 @@ model DayHabit {
 
   habit Habit @relation(fields: [habit_id], references: [id])
   day   Day   @relation(fields: [day_id], references: [id])
+}
+
+model HabitWeekDays {
+  id       String @id @default(uuid())
+  habit_id String
+  week_day Int
+
+  habit Habit @relation(fields: [habit_id], references: [id])
+
+  @@unique([habit_id, week_day])
+  @@map("habit_week_days")
 }

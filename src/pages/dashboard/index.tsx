@@ -1,9 +1,10 @@
 import Header from "../../components/header";
 import NavBar from "../../components/navbar";
 import { GetServerSideProps } from "next";
-import { signOut, getSession, useSession } from "next-auth/react";
+import { getSession } from "next-auth/react";
 
 import styles from './dashboard.module.css';
+import SideBar from "@/components/sideBar";
 
 export default function Dashboard({children, auth, session}:any ) {
     
@@ -14,7 +15,13 @@ export default function Dashboard({children, auth, session}:any ) {
             <NavBar />
             <div className={styles.content}>
               <Header session={auth ? auth : session}/>
-              {children}
+              
+              <div className={styles.habits}>
+                <div className={styles.content_habits}>
+                  {children}
+                </div>
+                <SideBar />
+              </div>
             </div>
         </div>
               

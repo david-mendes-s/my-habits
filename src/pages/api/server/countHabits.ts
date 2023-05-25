@@ -29,13 +29,13 @@ export default async function handler(
             } 
           })
       
-          const data = dayjs.tz(new Date(), 'America/Sao_Paulo').startOf('day').toISOString();
+          const data = dayjs.tz(new Date(), 'America/Sao_Paulo').startOf('day');
+          let parseDate = data.get('day');
+          
       
-          const count = await prisma.dayHabit.count({
+          const count = await prisma.habitWeekDays.count({
             where: {
-              day: {
-                date: data
-              },
+             week_day: parseDate,
               habit: {
                 userId: user?.id
               },
@@ -46,7 +46,7 @@ export default async function handler(
           const countCompleted = await prisma.dayHabit.count({
             where: {
               day: {
-                date: data
+                date: data.toISOString(),
               },
               habit: {
                 userId: user?.id
