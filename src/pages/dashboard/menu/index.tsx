@@ -128,11 +128,9 @@ export default function Menu({session}:SessionProps){
                         </div>
                       </div>
                     </td>
-                    <td>{user.sequences} dias</td>
+                    <td>{user.sequence} dias</td>
                 </tr>
-                ))}
-                
-                
+                ))}  
               </tbody>
             </table>
           </div>

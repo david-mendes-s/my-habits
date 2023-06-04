@@ -64,7 +64,7 @@ interface HabitsContextData {
     porcentAverage: number,
     weeklyConsistencyAverageSearch: IweeklyConsistencyAverageSearch[],
     agregacion:IAgregacion[],
-    rankingSequence:{ name: string, sequences: number, image:string }[],
+    rankingSequence:{ name: string, sequence: number, image:string }[],
   }
 
 
@@ -103,12 +103,7 @@ export function HabitsProvider({children}:IHabitsProvider){
     const [rankingSequence, setRankingSequence] = useState([]);
     
     
-    async function generateSequencesRanking(){
-      const response = await api.get('/server/informationsHabits');
-
-      setEntries(response.data.ranking);
-
-    }
+    
     
     let countB = 0;
     async function handleHabitsInformations(){
@@ -120,6 +115,7 @@ export function HabitsProvider({children}:IHabitsProvider){
       setPorcentAverage(response.data.porcentAverage);
       setBestHabit(response.data.bestHabit);
       setWeeklyConsistencyAverageSearch(response.data.weeklyConsistencyAverageSearch);
+      setRankingSequence(response.data.ranking)
       
       
       // Suponha que 'agregacion' seja o objeto contendo os dados fornecidos
@@ -136,7 +132,9 @@ export function HabitsProvider({children}:IHabitsProvider){
       setCountSequence(countB); 
     } 
 
-    console.log('countSequence: '+ countSequence);
+    async function generateSequencesRanking(){
+      await api.put('/server/informationsHabits');
+    }
     
     //information
   
@@ -173,7 +171,7 @@ export function HabitsProvider({children}:IHabitsProvider){
 
     useEffect(() =>{
       generateSequencesRanking();
-    },[countHabits, countHabitsInformationsCompleted]);
+    },[countSequence, agregacion]);
 
     useEffect(()=>{
         days.map(day => {
@@ -190,6 +188,7 @@ export function HabitsProvider({children}:IHabitsProvider){
         setProgress(Number((countCompleted*100)/count))
         handleHabitComplet()
         handleHabitsInformations()
+        generateSequencesRanking()
 
     }, [days, count, countCompleted, countHabitsInformationsCompleted]);
 
