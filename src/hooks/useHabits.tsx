@@ -7,7 +7,11 @@ import timezone from 'dayjs/plugin/timezone';
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
-
+interface IAgregacion {
+  habitos_concluidos: number,
+  total_habitos: number,
+  date: string
+}
 
 interface IHabitsProvider {
     children: ReactNode;
@@ -31,6 +35,18 @@ interface IhabitsProps {
   date: string;
 }
 
+interface IBestHabit {
+    title: string,
+    percent: number,
+    totalHabits: number,   
+    diff: number
+}
+
+interface IweeklyConsistencyAverageSearch{
+  week_day: number,
+  total_habits_completed: number,
+  habits: number
+}
 
 interface HabitsContextData {
     createHabits: (title:string, closeModal: () => void) => Promise<void>,
@@ -40,12 +56,22 @@ interface HabitsContextData {
     fetchHabits: () => Promise<void>,
     progress: number,
     habistCompleted: IhabitsProps[], 
-    handleUpdateHabitComplet: (habi:IhabitsProps) => Promise<void>, 
+    handleUpdateHabitComplet: (habi:IhabitsProps) => Promise<void>,
+    countHabitsInformations: number, 
+    countSequence: number, 
+    countHabitsInformationsCompleted: number,
+    bestHabit: IBestHabit, 
+    porcentAverage: number,
+    weeklyConsistencyAverageSearch: IweeklyConsistencyAverageSearch[],
+    agregacion:IAgregacion[],
+    rankingSequence:{ name: string, sequences: number, image:string }[],
   }
+
 
 const HabitsContext = createContext<HabitsContextData>({} as HabitsContextData );
 
 export function HabitsProvider({children}:IHabitsProvider){
+
 
     const [habits, setHabits] = useState<IhabitsProps[]>([]);
     const [days, setDays] = useState<IDays[]>([]);
@@ -57,6 +83,62 @@ export function HabitsProvider({children}:IHabitsProvider){
     const [countCompleted, setCountCompleted] = useState(0);
     const [habistCompleted, setHabitsCompleted] = useState<IhabitsProps[]>([]);
     let countHabits = count - countCompleted;
+
+    //information
+    const [countHabitsInformations, setCountHabitsInformations] = useState<number>(0);
+    const [countHabitsInformationsCompleted, setCountHabitsInformationsCompleted] = useState(0);
+    const [agregacion, setAgregacion] = useState<IAgregacion[]>([]);
+    const [countSequence, setCountSequence] = useState<number>(0);
+    const [weeklyConsistencyAverageSearch, setWeeklyConsistencyAverageSearch] = useState([]);
+    
+    const [bestHabit, setBestHabit] = useState<IBestHabit>({
+      title: "Melhor Hábito não definido",
+      percent: 0,
+      totalHabits: 0,   
+      diff: 0
+    });
+    const [porcentAverage, setPorcentAverage] = useState<number>(0);
+    
+    const [entries, setEntries] = useState([]);
+    const [rankingSequence, setRankingSequence] = useState([]);
+    
+    
+    async function generateSequencesRanking(){
+      const response = await api.get('/server/informationsHabits');
+
+      setEntries(response.data.ranking);
+
+    }
+    
+    let countB = 0;
+    async function handleHabitsInformations(){
+      const response = await api.get('/server/informationsHabits')
+    
+      setCountHabitsInformations(response.data.count);
+      setCountHabitsInformationsCompleted(response.data.countHabitsCompleted);
+      setAgregacion(response.data.agregacion);
+      setPorcentAverage(response.data.porcentAverage);
+      setBestHabit(response.data.bestHabit);
+      setWeeklyConsistencyAverageSearch(response.data.weeklyConsistencyAverageSearch);
+      
+      
+      // Suponha que 'agregacion' seja o objeto contendo os dados fornecidos
+      agregacion.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()); 
+
+          agregacion.forEach((day, index) => {
+            if(index > 0 && agregacion[index - 1].total_habitos === agregacion[index - 1].habitos_concluidos){
+              countB += 1;
+            }else{
+              countB = 0; 
+            }
+          });
+
+      setCountSequence(countB); 
+    } 
+
+    console.log('countSequence: '+ countSequence);
+    
+    //information
   
     async function handleCountProgress(){
       const response = await api.get('/server/countHabits')
@@ -88,7 +170,11 @@ export function HabitsProvider({children}:IHabitsProvider){
       
       setHabits(response.data);
     }
-    
+
+    useEffect(() =>{
+      generateSequencesRanking();
+    },[countHabits, countHabitsInformationsCompleted]);
+
     useEffect(()=>{
         days.map(day => {
           if(day.check === true){
@@ -103,8 +189,9 @@ export function HabitsProvider({children}:IHabitsProvider){
         handleCountProgress()
         setProgress(Number((countCompleted*100)/count))
         handleHabitComplet()
-        
-    }, [days, count, countCompleted]);
+        handleHabitsInformations()
+
+    }, [days, count, countCompleted, countHabitsInformationsCompleted]);
 
     
 
@@ -143,8 +230,12 @@ export function HabitsProvider({children}:IHabitsProvider){
     }
 
     return(
-        <HabitsContext.Provider value={{createHabits, handleDays, habits, countHabits, fetchHabits, habistCompleted, handleUpdateHabitComplet, progress}}>
-            {children}
+        <HabitsContext.Provider value={{createHabits, handleDays, habits, 
+                                        countHabits, fetchHabits, habistCompleted, 
+                                        handleUpdateHabitComplet, progress, countHabitsInformations, 
+                                        countHabitsInformationsCompleted, countSequence, 
+                                        bestHabit, porcentAverage, weeklyConsistencyAverageSearch, agregacion, rankingSequence}}>
+                                {children}
         </HabitsContext.Provider>
     );
 }
