@@ -35,20 +35,22 @@ export default async function handler(
         } 
         
       })
+
+      const date = dayjs.tz(new Date(), 'America/Sao_Paulo').startOf('day').toDate();
   
       await prisma.habit.create({
         data: {
           title: data.title,
+          created_at: date,
           user: { connect: { id: user?.id } }, // Conecta o hábito ao usuário com o id correspondente
-          DayHabit: {
-            create: data.dates.map((days: Date) => ({
-              day: { create: { date: days } }
+          weekDays: {
+            create: data.daysChecked.map((weekDay:any) => ({
+              week_day: weekDay.id
             }))
           }
         },
-        include: { DayHabit: true } // Carrega também os dias criados
+        include: { weekDays: true } // Carrega também os dias criados
       });
-
       
       return res.status(201).json({message: "create habit with sucess."});
     }catch(err){
@@ -70,21 +72,38 @@ export default async function handler(
       })
 
 
-      const data = dayjs.tz(new Date(), 'America/Sao_Paulo').startOf('day').toISOString();
+      const data = dayjs.tz(new Date(), 'America/Sao_Paulo').startOf('day').toDate();
       
+      const weekDay = data.getDay();
 
-      const listHabits = await prisma.$queryRaw(
-        Prisma.sql`
-          SELECT dh.id, dh.habit_id, dh.day_id, dh.completed, h.title
-          FROM "DayHabit" dh
-          INNER JOIN "Habit" h ON dh."habit_id" = h."id"
-          WHERE dh."day_id" IN (
-            SELECT "id" FROM "Day" WHERE "date" = ${data}
-          ) AND h."userId" = ${user?.id} AND dh.completed = false
-        `
-      );
+        // todos hábitos possiveis
+        const possibleHabits = await prisma.habit.findMany({
+          where: {
+            created_at: {
+              lte: data,
+            },
+            weekDays: {
+              some: {
+                week_day: weekDay
+              }
+            },
+            user: {
+              id: user?.id
+            },
+          },
 
-      return res.status(200).json(listHabits);
+          include: {
+            DayHabit: {
+              where: {
+                day: {
+                  date: data.toISOString(),
+                }
+              }
+            },
+          }
+        });
+        
+      return res.status(200).json(possibleHabits);
     }catch(err:any) {
       throw new Error('internal error', err);
     }
@@ -99,25 +118,69 @@ export default async function handler(
     }
 
     const data = req.body;
+    
+    const user = await prisma.user.findFirst({
+      where: {
+        email: session?.user?.email
+      } 
+    })
 
-    const habit = await prisma.dayHabit.findUnique({
+    const habit = await prisma.habit.findUnique({
       where: {
         id: data.habit.id
       }
     })
-    
-  
-    if (!habit) {
-      res.status(401).json({ message: 'There is no such habit' });
-      return;
-    } 
-
-    await prisma.dayHabit.update({
-      where: { id: data.habit.id }, // ID do registro a ser atualizado
-      data: { completed: true }, // Valor atualizado do campo completed
-    });
      
+    if (!habit) {
+      res.status(401).json({ message: 'No existed habit!' });
+      return;
+    }
 
+    const today = dayjs.tz(new Date(), 'America/Sao_Paulo').startOf('day').toISOString();
+
+    const existingDayHabit = await prisma.dayHabit.findFirst({
+      where: {
+        habit: {
+          user: {
+            id: user?.id
+          }
+        },
+        habit_id: habit.id,
+        day: {
+          date: today,
+        }
+      }
+    });
+
+
+    
+    if (existingDayHabit) {
+      await prisma.dayHabit.delete({
+        where: {
+          id: existingDayHabit.id,
+        },
+      });
+
+      await prisma.day.delete({
+        where: {
+          id: existingDayHabit.day_id
+        }
+      })
+
+    } else {
+      await prisma.dayHabit.create({
+        data: {
+          habit: { connect: { id: habit.id } },
+          completed: true,
+          day: {
+            create: {
+              date: today
+            }
+          }
+        }
+      });
+    }
+    
     return res.status(200).json({message: "update habit with sucess."});
   }
 }
