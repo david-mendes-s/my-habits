@@ -93,13 +93,13 @@ export default async function handler(
 
         const seacherProgressToday = await prisma.progress.findFirst({
             where: {
-                date_completed_habit:  data.toISOString()
+                date_completed_habit: data.toISOString()
             }
         })
            
         //Criação e atualização do progresso
-        if(totalHabitos > 0){
-            if(seacherProgressToday === null){
+       
+            if(!seacherProgressToday){
                 await prisma.progress.create({
                     data: {
                         progress_habit: (progresso.length / possibleHabits.length) * 100 || 0,
@@ -128,7 +128,7 @@ export default async function handler(
             
                 
            }
-        }
+        
         
         //Lista de progresso
        const progressMany = await prisma.progress.findMany({
@@ -205,7 +205,8 @@ export default async function handler(
         `;
         
         return res.status(200).json(
-            {
+            {   possibleHabits,
+                progresso,
                 progressMany, 
                 totalHabitos, 
                 totalHabitosCompletos, 

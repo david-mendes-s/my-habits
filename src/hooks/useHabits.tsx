@@ -124,7 +124,19 @@ export function HabitsProvider({children}:IHabitsProvider){
       
     } 
 
-    
+    async function handleDaysCompleted(){
+      const response = await api.get('/server/info')
+      
+      setDaysCompleted(response.data.progressMany);
+      setCountSequence(response.data.sequences.sequence);
+      setPorcentAverage(response.data.constanceMedia);
+      setWeeklyConsistencyAverageSearch(response.data.mediaConstanceByWeekDays);
+
+      setCountHabitsInformations(response.data.totalHabitos);
+      setCountHabitsInformationsCompleted(response.data.totalHabitosCompletos);
+
+      setRankingSequence(response.data.ranking);
+    }
     //information
   
     async function handleCountProgress(){
@@ -158,19 +170,7 @@ export function HabitsProvider({children}:IHabitsProvider){
     }
 
 
-    async function handleDaysCompleted(){
-      const response = await api.get('/server/info')
-      
-      setDaysCompleted(response.data.progressMany);
-      setCountSequence(response.data.sequences.sequence);
-      setPorcentAverage(response.data.constanceMedia);
-      setWeeklyConsistencyAverageSearch(response.data.mediaConstanceByWeekDays);
-
-      setCountHabitsInformations(response.data.totalHabitos);
-      setCountHabitsInformationsCompleted(response.data.totalHabitosCompletos);
-
-      setRankingSequence(response.data.ranking);
-    }
+    
 
     useEffect(()=>{
         days.map(day => {
@@ -208,6 +208,7 @@ export function HabitsProvider({children}:IHabitsProvider){
           closeModal();
 
           setDays([]);
+          handleDaysCompleted();
         }catch(err){
           console.log(err);
         } 
