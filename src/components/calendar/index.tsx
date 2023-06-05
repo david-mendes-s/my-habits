@@ -13,10 +13,10 @@ function Commit({ days }: any) {
 
 export default function Calendar() {
   const dayofYear = generateYearForDays();
-  const { agregacion } = useHabits();
+  const { daysCompleted } = useHabits();
   
   const renderedCommits = dayofYear.map((day) => {
-    const habitFound = agregacion.find((habit) => habit.date === day.toISOString() && habit.total_habitos === habit.habitos_concluidos);
+    const habitFound = daysCompleted.find((habit) => habit.date_completed_habit === day.toISOString() && habit.progress_habit === 100);
     return <Commit key={day} days={habitFound} />;
   });
 

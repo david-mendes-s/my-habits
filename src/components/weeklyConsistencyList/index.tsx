@@ -34,7 +34,7 @@ const getEmojiForPercentage = (percentage:number) => {
       );
   
       // Define o emoji com base no objeto encontrado ou usa o emoji padrão
-      const emoji = consistencyData ? getEmojiForPercentage((consistencyData.total_habits_completed / consistencyData.habits)*100) : defaultEmoji;
+      const emoji = consistencyData ? getEmojiForPercentage(consistencyData._avg.progress_habit) : defaultEmoji;
   
       return (
         <li key={index}>

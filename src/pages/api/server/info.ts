@@ -7,7 +7,7 @@ import dayjs from "dayjs";
 
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
-import { User } from "@prisma/client";
+
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -80,31 +80,164 @@ export default async function handler(
             }
           });
 
-          const progresso = possibleHabits.map(habit => {
+        const progresso = possibleHabits.map(habit => {
             if(habit.DayHabit.length <= 0){
                 return false;
             }else {
                 return true;
             }
-          }).every(habitCompleted => habitCompleted === true);
+        }).filter(habitCompleted => habitCompleted === true);
 
-          const repositorioProgressoDoDia: {progresso: boolean, dataCompletadoHabito:string, diaDaSemana: number, user: User }[] = [];
 
-          console.log(progresso, repositorioProgressoDoDia);
+        //Verificar se dia já existe
 
-          if(progresso === true && totalHabitos > 0){
-            repositorioProgressoDoDia.push(
-                {
-                    progresso, 
-                    dataCompletadoHabito: data.toISOString(), 
-                    diaDaSemana: data.getDay(),
-                    user: user!,
+        const seacherProgressToday = await prisma.progress.findFirst({
+            where: {
+                date_completed_habit:  data.toISOString()
+            }
+        })
+           
+        //Criação e atualização do progresso
+        if(totalHabitos > 0){
+            if(seacherProgressToday === null){
+                await prisma.progress.create({
+                    data: {
+                        progress_habit: (progresso.length / possibleHabits.length) * 100 || 0,
+                        date_completed_habit: data.toISOString(),
+                        week_day: data.getDay(),
+                        habitsCompleteds: progresso.length,
+                        possibleHabitsDay: possibleHabits.length,
+                        userId: user?.id!
+                    }
+                });
+                
+           }else{
+            
+                await prisma.progress.update({
+                    where: {
+                        id: seacherProgressToday?.id
+                    },
+                    data: {
+                        progress_habit: (progresso.length / possibleHabits.length) * 100 || 0,
+                        date_completed_habit: data.toISOString(),
+                        week_day: data.getDay(),
+                        habitsCompleteds: progresso.length,
+                        possibleHabitsDay: possibleHabits.length,
+                    }
                 })
-          }/* else if(progress === false){
-            let posicaoDoDiNoArray = repositorioProgressoDoDia.findIndex((dates) => dates.dataCompletadoHabito === data.toISOString())
-            repositorioProgressoDoDia.splice(posicaoDoDiNoArray, 1);
-          } */
+            
+                
+           }
+        }
+        
+        //Lista de progresso
+       const progressMany = await prisma.progress.findMany({
+        where: {
+            userId: user?.id
+        },
+        orderBy: {
+            date_completed_habit: 'asc'
+        }
+       })
 
-          return res.status(200).json({repositorioProgressoDoDia, totalHabitos, totalHabitosCompletos});
+       //Sequencia
+
+        const copyProgressMany = progressMany;
+       
+        let repositorySequence = 0;
+       
+        copyProgressMany.map(progress => {
+            if(progress.progress_habit === 100){
+                repositorySequence++;
+            }else{
+                repositorySequence = 0;
+            }
+        })
+
+        console.log(repositorySequence);
+
+        await prisma.user.update({
+            where: {
+                id: user?.id
+            },
+            data: {
+               sequence: repositorySequence,
+            } 
+        })
+
+        const sequences = await prisma.user.findFirst({
+            select: {
+                sequence: true
+            },
+            where: {
+                id: user?.id
+            }
+        })
+
+        // Contância Média
+        let repositoryConstanceMedia = 0;
+        const copyByprogressManyForConstance = progressMany;
+
+        copyByprogressManyForConstance.map(progress => {
+            repositoryConstanceMedia = repositoryConstanceMedia + progress.progress_habit;
+        });
+
+        let constanceMedia = repositoryConstanceMedia/copyByprogressManyForConstance.length
+
+        //Melhor Hábito
+
+        
+
+        //Avaliação por emoji: Média das Constâncias por dia da semana
+
+        const mediaConstanceByWeekDays = await prisma.progress.groupBy({
+            by: ['week_day'],
+            _avg: {
+                progress_habit: true,
+            }
+        })
+
+        //Listagem do Ranking
+
+        const ranking = await prisma.$queryRaw`
+            SELECT * FROM "User" U
+            ORDER BY U.sequence DESC;
+        `;
+        
+        return res.status(200).json(
+            {
+                progressMany, 
+                totalHabitos, 
+                totalHabitosCompletos, 
+                sequences, 
+                constanceMedia,
+                mediaConstanceByWeekDays,
+                ranking
+            });
     }
   }
+
+  
+
+  /* const verifyDate:{exists: boolean}[] = await prisma.$queryRaw`
+  SELECT EXISTS(SELECT * FROM "Progress" Pr
+  WHERE Pr.date_completed_habit = ${data.toISOString()})
+`
+console.log(verifyDate[0].exists); */
+  /*   const repositorioProgressoDoDia: {
+        user: string 
+        progress: number, 
+        week_day: number, 
+        dateCompletedHabit:string, 
+        possibleHabitsDay: number,
+        habitsCompleteds: number,
+    }[] = []; */
+  /* repositorioProgressoDoDia.push(
+    {
+        progress: (progresso.length / possibleHabits.length) * 100 || 0, 
+        dateCompletedHabit: data.toISOString(), 
+        week_day: data.getDay(),
+        user: user?.id!,
+        habitsCompleteds: progresso.length,
+        possibleHabitsDay: possibleHabits.length
+    }) */
