@@ -32,15 +32,14 @@ export default async function handler(
       
           const data = dayjs.tz(new Date(), 'America/Sao_Paulo').startOf('day').toISOString();
       
-          const listHabits = await prisma.$queryRaw(
-            Prisma.sql`
+          const listHabits = await prisma.$queryRaw`
               SELECT dh.id, dh.habit_id, dh.day_id, dh.completed, h.title, d.date
               FROM "DayHabit" dh
               INNER JOIN "Habit" h ON dh."habit_id" = h."id"
               INNER JOIN "Day" d ON dh."day_id" = d."id"
               WHERE d."date" = ${data} AND h."userId" = ${user?.id} AND dh.completed = true
             `
-          );
+          ;
           
 
         return res.status(201).json(listHabits);
