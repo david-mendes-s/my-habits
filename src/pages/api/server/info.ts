@@ -205,8 +205,8 @@ export default async function handler(
         `;
         
         return res.status(200).json(
-            {   possibleHabits,
-                progresso,
+            {   
+                user,
                 progressMany, 
                 totalHabitos, 
                 totalHabitosCompletos, 

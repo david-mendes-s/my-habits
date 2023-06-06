@@ -22,6 +22,8 @@ export default function Header({session}:any) {
         setIsOpen(false);
     }
 
+    //const {user} = useHabits();
+
     return(
         <div className={styles.container}>
             <div className={styles.content}>

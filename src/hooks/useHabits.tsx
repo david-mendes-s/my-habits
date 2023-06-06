@@ -73,7 +73,8 @@ interface HabitsContextData {
       date_completed_habit:string, 
       possibleHabitsDay: number,
       habitsCompleteds: number,
-  }[]
+    }[],
+   
   }
 
 
@@ -86,7 +87,7 @@ export function HabitsProvider({children}:IHabitsProvider){
     const [countSequence, setCountSequence] = useState<number>(0);
     const [porcentAverage, setPorcentAverage] = useState<number>(0);
     const [weeklyConsistencyAverageSearch, setWeeklyConsistencyAverageSearch] = useState([]);
-  
+    const [user, setUser] = useState();
     //
     const [habits, setHabits] = useState<IhabitsProps[]>([]);
     const [days, setDays] = useState<IDays[]>([]);
@@ -136,6 +137,7 @@ export function HabitsProvider({children}:IHabitsProvider){
       setCountHabitsInformationsCompleted(response.data.totalHabitosCompletos);
 
       setRankingSequence(response.data.ranking);
+      setUser(response.data.user);
     }
     //information
   

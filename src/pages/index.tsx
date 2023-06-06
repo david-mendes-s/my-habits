@@ -15,7 +15,7 @@ export default function Home() {
       </Head>
       <main className={styles.signInPage}>
             <button className={nunito.className} onClick={() => signIn('google', {
-              callbackUrl: '/dashboard/habits'
+              callbackUrl: '/dashboard'
             })}>
               <FcGoogle size={25}/>
               Entrar com o Google</button>  
