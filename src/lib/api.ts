@@ -7,7 +7,7 @@ axios.defaults.validateStatus = (status) => status >= 200 && status < 300;
 
 // Configurações para o ambiente de produção
 const productionConfig = axios.create({
-  baseURL: 'https://my-habits-alpha.vercel.app/api', // Insira a URL da API de produção
+  baseURL: 'https://my-habits-two.vercel.app/api', // Insira a URL da API de produção
 });
 
 // Configurações para o ambiente de desenvolvimento
