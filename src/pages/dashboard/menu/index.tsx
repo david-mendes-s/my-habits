@@ -25,7 +25,7 @@ export default function Menu({session}:SessionProps){
 
     
     return(
-       <Dashboard auth={session}>
+       <Dashboard>
         <div className={`${styles.container} ${nunito.className}`}>
           <div className={styles.information}>
             <div className={styles.sequence}>

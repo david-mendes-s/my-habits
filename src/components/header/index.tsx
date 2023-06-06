@@ -7,10 +7,11 @@ import Image from 'next/image';
 import { ModalTest } from '../modal/ModelTest';
 import { useState } from 'react';
 import { useHabits } from '@/hooks/useHabits';
+import { useSession } from 'next-auth/react';
 
 const nunito = Nunito({ subsets: ['latin'], variable: '--font-nunito', })
 
-export default function Header({session}:any) {
+export default function Header() {
     const {countHabits} = useHabits();
     const [modalIsOpen, setIsOpen] = useState(false);
       
@@ -22,7 +23,7 @@ export default function Header({session}:any) {
         setIsOpen(false);
     }
 
-    //const {user} = useHabits();
+    const { data: session } = useSession();
 
     return(
         <div className={styles.container}>
@@ -30,10 +31,10 @@ export default function Header({session}:any) {
             <div className={styles.profile}>
                 <div className={styles.content_avatar}>
                     
-                    <Image src={session.user.image} alt="avatar" width={40} height={40}/>
+                    <Image src={session?.user?.image!} alt="avatar" width={40} height={40}/>
                 </div>
                 <div className={styles.content_profile}>
-                    <strong className={nunito.className}>Bem Vindo, {session.user.name}</strong>
+                    <strong className={nunito.className}>Bem Vindo, {session?.user?.name}</strong>
                     <p className={nunito.className}>Você tem <strong> {countHabits} tarefas </strong>pendentes</p>
                 </div>
             </div>
