@@ -18,7 +18,7 @@ export default async function handler(
     req: NextApiRequest,
     res: NextApiResponse
   ) {
-    if(req.method === 'GET') {
+    if(req.method === 'POST') {
 
         const session = await getServerSession(req, res, authOptions);
         
@@ -32,23 +32,6 @@ export default async function handler(
               email: session.user?.email
             } 
         })
-
-        /*Todos os hábitos e todos os hábitos completos*/
-        const totalHabitos = await prisma.habit.count({
-            where: {
-                userId: user?.id
-            }
-          });
-      
-          const totalHabitosCompletos = await prisma.dayHabit.count({
-            where: {
-                habit: {
-                    userId: user?.id
-                }
-            },
-            
-          });
-
 
         const data = dayjs.tz(new Date(), 'America/Sao_Paulo').startOf('day').toDate();
       
@@ -79,7 +62,7 @@ export default async function handler(
               },
             }
           });
-
+          
         const progresso = possibleHabits.map(habit => {
             if(habit.DayHabit.length <= 0){
                 return false;
@@ -99,37 +82,70 @@ export default async function handler(
            
         //Criação e atualização do progresso
        
-            if(!seacherProgressToday){
-                await prisma.progress.create({
-                    data: {
-                        progress_habit: (progresso.length / possibleHabits.length) * 100 || 0,
-                        date_completed_habit: data.toISOString(),
-                        week_day: data.getDay(),
-                        habitsCompleteds: progresso.length,
-                        possibleHabitsDay: possibleHabits.length,
-                        userId: user?.id!
-                    }
-                });
-                
-           }else{
+        if(!seacherProgressToday){
+            await prisma.progress.create({
+                data: {
+                    progress_habit: (progresso.length / possibleHabits.length) * 100 || 0,
+                    date_completed_habit: data.toISOString(),
+                    week_day: data.getDay(),
+                    habitsCompleteds: progresso.length,
+                    possibleHabitsDay: possibleHabits.length,
+                    userId: user?.id!
+                }
+            });
             
-                await prisma.progress.update({
-                    where: {
-                        id: seacherProgressToday?.id
-                    },
-                    data: {
-                        progress_habit: (progresso.length / possibleHabits.length) * 100 || 0,
-                        date_completed_habit: data.toISOString(),
-                        week_day: data.getDay(),
-                        habitsCompleteds: progresso.length,
-                        possibleHabitsDay: possibleHabits.length,
-                    }
-                })
+        }else{
+        
+            await prisma.progress.update({
+                where: {
+                    id: seacherProgressToday?.id
+                },
+                data: {
+                    progress_habit: (progresso.length / possibleHabits.length) * 100 || 0,
+                    date_completed_habit: data.toISOString(),
+                    week_day: data.getDay(),
+                    habitsCompleteds: progresso.length,
+                    possibleHabitsDay: possibleHabits.length,
+                }
+            })
+        
             
-                
-           }
+        }
+      
+        return res.status(200).json({message: 'created sussess'});
+    }else if(req.method === 'GET'){
+        const session = await getServerSession(req, res, authOptions);
         
-        
+        if (!session) {
+            res.status(401).json({ message: 'Unauthorized' });
+            return;
+        }
+
+        const user = await prisma.user.findFirst({
+            where: {
+              email: session.user?.email
+            } 
+        })
+
+        /*Todos os hábitos e todos os hábitos completos*/
+        const totalHabitos = await prisma.habit.count({
+            where: {
+                userId: user?.id
+            }
+          });
+      
+          const totalHabitosCompletos = await prisma.dayHabit.count({
+            where: {
+                habit: {
+                    userId: user?.id
+                }
+            },
+            
+          });
+
+
+       
+    
         //Lista de progresso
        const progressMany = await prisma.progress.findMany({
         where: {
@@ -204,9 +220,9 @@ export default async function handler(
             ORDER BY U.sequence DESC;
         `;
         
+        
         return res.status(200).json(
             {   
-                user,
                 progressMany, 
                 totalHabitos, 
                 totalHabitosCompletos, 

@@ -153,6 +153,9 @@ export function HabitsProvider({children}:IHabitsProvider){
         habit
       });
       
+      await api.post('/server/info');
+      
+      handleDaysCompleted();
       fetchHabits();
       handleCountProgress();
 
@@ -207,10 +210,12 @@ export function HabitsProvider({children}:IHabitsProvider){
             daysChecked // [1,2,3]
           });
 
+          await api.post('/server/info');
+          handleDaysCompleted();
+
           closeModal();
 
           setDays([]);
-          handleDaysCompleted();
         }catch(err){
           console.log(err);
         } 

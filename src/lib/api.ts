@@ -3,7 +3,6 @@
 import axios from 'axios';
 
 // Configurações comuns para todas as instâncias
-axios.defaults.validateStatus = (status) => status >= 200 && status < 300;
 
 // Configurações para o ambiente de produção
 const productionConfig = axios.create({
