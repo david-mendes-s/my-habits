@@ -26,7 +26,7 @@ export default function Header() {
     const { data: session } = useSession();
 
     return(
-        <div className={styles.container}>
+        <div className={`${styles.container} ${nunito.className}`}>
             <div className={styles.content}>
             <div className={styles.profile}>
                 <div className={styles.content_avatar}>
@@ -34,12 +34,12 @@ export default function Header() {
                     <Image src={session?.user?.image!} alt="avatar" width={40} height={40}/>
                 </div>
                 <div className={styles.content_profile}>
-                    <strong className={nunito.className}>Bem Vindo, {session?.user?.name}</strong>
-                    <p className={nunito.className}>Você tem <strong> {countHabits} tarefas </strong>pendentes</p>
+                    <strong>Bem Vindo, {session?.user?.name}</strong>
+                    <p>Você tem <strong> {countHabits} tarefas </strong>pendentes</p>
                 </div>
             </div>
             <div className={styles.actions_buttons}>
-                <button onClick={openModal} className={nunito.className}>Criar Habits</button>
+                <button onClick={openModal}>Criar Habits</button>
                 <button>
                     <BsBell size={18} color='#5237E9'/>
                 </button>

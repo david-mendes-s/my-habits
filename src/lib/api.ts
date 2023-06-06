@@ -14,7 +14,9 @@ const developmentConfig = axios.create({
   baseURL: 'http://localhost:3000/api', // Insira a URL da API de desenvolvimento
 });
 
+'developer'
+
 // Exporta a instância correta dependendo do ambiente
-export const api = process.env.NODE_ENV === 'production' ? productionConfig : developmentConfig;
+export const api = process.env.NEXT_PUBLIC_NODE_ENV_API === 'production' ? productionConfig: developmentConfig;
 
 
