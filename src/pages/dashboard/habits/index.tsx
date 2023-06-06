@@ -18,7 +18,7 @@ export default function Habits({session}:SessionProps){
   const {habits, handleUpdateHabitComplet} = useHabits();
 
     return(
-      <Dashboard auth={session}>
+      <Dashboard>
           
             <ul className={`${styles.list_habits} ${nunito.className}`}>
               {habits.map(habit => (

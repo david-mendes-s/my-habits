@@ -6,15 +6,14 @@ import { getSession } from "next-auth/react";
 import styles from './dashboard.module.css';
 import SideBar from "@/components/sideBar";
 
-export default function Dashboard({children, auth, session}:any ) {
+export default function Dashboard({children}:any ) {
     
-
     return (
       
         <div className={styles.container}>
             <NavBar />
             <div className={styles.content}>
-              <Header session={auth ? auth : session}/>
+              <Header />
               
               <div className={styles.habits}>
                 <div className={styles.content_habits}>
