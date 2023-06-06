@@ -174,7 +174,9 @@ export function HabitsProvider({children}:IHabitsProvider){
       setHabits(response.data);
     }
 
-
+    async function teste(){
+      await api.post('/server/info');
+    }
     
 
     useEffect(()=>{
@@ -187,7 +189,7 @@ export function HabitsProvider({children}:IHabitsProvider){
         })
 
         fetchHabits();
-
+        teste();
         handleCountProgress()
         setProgress(Number((countCompleted*100)/count))
         handleHabitComplet()

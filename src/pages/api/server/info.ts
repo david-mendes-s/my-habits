@@ -33,6 +33,12 @@ export default async function handler(
             } 
         })
 
+        const totalHabitos = await prisma.habit.count({
+            where: {
+                userId: user?.id
+            }
+        });
+
         const data = dayjs.tz(new Date(), 'America/Sao_Paulo').startOf('day').toDate();
       
         const weekDay = data.getDay();
@@ -74,15 +80,23 @@ export default async function handler(
 
         //Verificar se dia já existe
 
+        
+        console.log("total: "+progresso.length)
+
         const seacherProgressToday = await prisma.progress.findFirst({
             where: {
-                date_completed_habit: data.toISOString()
+                date_completed_habit: data.toISOString(),
+                userId: user?.id
             }
+
         })
            
+        console.log("total: "+seacherProgressToday?.date_completed_habit)
         //Criação e atualização do progresso
        
-        if(!seacherProgressToday){
+        if(totalHabitos > 0){
+        
+        if(seacherProgressToday?.date_completed_habit !== data.toISOString()){
             await prisma.progress.create({
                 data: {
                     progress_habit: (progresso.length / possibleHabits.length) * 100 || 0,
@@ -111,7 +125,8 @@ export default async function handler(
         
             
         }
-      
+        
+        }
         return res.status(200).json({message: 'created sussess'});
     }else if(req.method === 'GET'){
         const session = await getServerSession(req, res, authOptions);
@@ -143,8 +158,42 @@ export default async function handler(
             
           });
 
+          const data = dayjs.tz(new Date(), 'America/Sao_Paulo').startOf('day').toDate();
+          const weekDay = data.getDay();
 
-       
+          const possibleHabits = await prisma.habit.findMany({
+            where: {
+              created_at: {
+                lte: data,
+              },
+              weekDays: {
+                some: {
+                  week_day: weekDay
+                }
+              },
+              user: {
+                id: user?.id
+              },
+            },
+  
+            include: {
+              DayHabit: {
+                where: {
+                  day: {
+                    date: data.toISOString(),
+                  }
+                }
+              },
+            }
+          });
+
+        const progresso = possibleHabits.map(habit => {
+            if(habit.DayHabit.length <= 0){
+                return false;
+            }else {
+                return true;
+            }
+        }).filter(habitCompleted => habitCompleted === true);
     
         //Lista de progresso
        const progressMany = await prisma.progress.findMany({
@@ -210,6 +259,9 @@ export default async function handler(
             by: ['week_day'],
             _avg: {
                 progress_habit: true,
+            },
+            where: {
+                userId: user?.id
             }
         })
 
@@ -223,6 +275,8 @@ export default async function handler(
         
         return res.status(200).json(
             {   
+                possibleHabits,
+                progresso,
                 progressMany, 
                 totalHabitos, 
                 totalHabitosCompletos, 

@@ -9,7 +9,6 @@ import { useHabits } from "@/hooks/useHabits";
 import WeeklyConsistencyList from "@/components/weeklyConsistencyList";
 import styles from './Menu.module.css';
 import Calendar from "@/components/calendar";
-import { getSession } from "next-auth/react";
 
 
 type SessionProps = {
@@ -141,22 +140,20 @@ export default function Menu({session}:SessionProps){
 }
 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
-  const session = await getSession(ctx);
+    const session = await getServerSession(ctx.req, ctx.res, authOptions);
 
-  console.log(session);
-
-  if (!session) {
-    return {
-      redirect: {
-        destination: '/',
-        permanent: false,
-      },
-    };
-  }
-
-  return {
-    props: {
-      session,
+    if (!session) {
+      return {
+        redirect: {
+          destination: '/',
+          permanent: false,
+        },
+      };
     }
+
+    return {
+      props: {
+        session,   
+      }
+    };
   };
-};

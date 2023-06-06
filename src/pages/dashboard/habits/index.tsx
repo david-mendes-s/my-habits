@@ -8,7 +8,6 @@ import { authOptions } from "@/pages/api/auth/[...nextauth]";
 
 import { useHabits } from "@/hooks/useHabits";
 import { useState } from "react";
-import { getSession } from "next-auth/react";
 
 type SessionProps = {
   session: Session | null
@@ -37,23 +36,22 @@ export default function Habits({session}:SessionProps){
       </Dashboard>
     );
 }
+
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
-  const session = await getSession(ctx);
+    const session = await getServerSession(ctx.req, ctx.res, authOptions);
 
-  console.log(session);
-
-  if (!session) {
-    return {
-      redirect: {
-        destination: '/',
-        permanent: false,
-      },
-    };
-  }
-
-  return {
-    props: {
-      session,
+    if (!session) {
+      return {
+        redirect: {
+          destination: '/',
+          permanent: false,
+        },
+      };
     }
+    
+    return {
+      props: {
+        session,
+      }
+    };
   };
-};
