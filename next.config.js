@@ -7,7 +7,7 @@ const nextConfig = {
   async headers() {
     return [
       {
-        source: ["/dashboard", "/dashboard/menu", "/dashboard/habits"],
+        source: "/dashboard",
         headers: [
           {
             key: "Cache-Control",
