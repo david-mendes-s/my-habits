@@ -67,20 +67,26 @@ export default async function handler(
         }
       });
 
-      const habitCompleted:[] = await prisma.$queryRaw`
+      const habitCompleted:{ 
+      habit_id: string,
+      title: string,
+      habit_completed: number}[] = await prisma.$queryRaw`
         SELECT DH.habit_id, H.title ,CAST(COUNT(DH.habit_id) as float) as habit_completed
         FROM "DayHabit" DH, "User" U, "Habit" H
         WHERE DH.habit_id = H.id AND U.id = H."userId" AND U.id = ${user?.id}
         GROUP BY DH.habit_id, H.title 
       `
 
-      const habitsIncompleted:[] = await prisma.$queryRaw`
+      const habitsIncompleted:{ 
+        habit_id: string,
+        title: string,
+        habit_incomplete: number}[] = await prisma.$queryRaw`
         SELECT IH.habit_id, IH.title, CAST(COUNT(IH.habit_id) as float) as habit_incomplete
         FROM "IncompleteHabit" IH, "User" U
         WHERE U.id = ${user?.id}
         GROUP BY IH.habit_id, IH.title 
       `
-      const constancy = {};
+      const constancy:any = {};
 
       for (const habit of habitCompleted) {
         const { habit_id, title, habit_completed } = habit;
@@ -115,7 +121,7 @@ export default async function handler(
 
       const constancyList = Object.values(constancy);
 
-      const bestHabit = constancyList.reduce((prev, curr) => {
+      const bestHabit = constancyList.reduce((prev:any, curr:any) => {
         if (curr.completed > prev.completed || (curr.completed === prev.completed && curr.percent > prev.percent)) {
           return curr;
         }
