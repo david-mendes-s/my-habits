@@ -219,8 +219,6 @@ export default async function handler(
             }
         })
 
-        console.log(repositorySequence);
-
         await prisma.user.update({
             where: {
                 id: user?.id
@@ -271,7 +269,7 @@ export default async function handler(
             SELECT * FROM "User" U
             ORDER BY U.sequence DESC;
         `;
-        
+    
         
         return res.status(200).json(
             {   
@@ -283,7 +281,7 @@ export default async function handler(
                 sequences, 
                 constanceMedia,
                 mediaConstanceByWeekDays,
-                ranking
+                ranking,
             });
     }
   }

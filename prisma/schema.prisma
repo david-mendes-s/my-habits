@@ -107,3 +107,14 @@ model Progress {
   habitsCompleteds     Int
   user                 User   @relation(fields: [userId], references: [id])
 }
+
+model IncompleteHabit {
+  id              String   @id @default(uuid())
+  habit_id        String
+  userId          String
+  title           String
+  date_created_at DateTime
+  date_incomplete String
+
+  @@unique([habit_id, date_incomplete])
+}
