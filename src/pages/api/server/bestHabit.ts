@@ -11,7 +11,14 @@ import { IncompleteHabit } from "@prisma/client";
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
-
+interface IConstancy {
+    habit_id: string,
+    title: string,
+    incomplete: number,
+    completed: number,
+    percent: number,
+    total: number  
+}
 interface IBestHabit {
     "title": string,
     "habits_completed": number,
@@ -86,7 +93,7 @@ export default async function handler(
         WHERE U.id = ${user?.id}
         GROUP BY IH.habit_id, IH.title 
       `
-      const constancy:any = {};
+      let constancy:any = {};
 
       for (const habit of habitCompleted) {
         const { habit_id, title, habit_completed } = habit;
@@ -119,14 +126,29 @@ export default async function handler(
         }
       }
 
-      const constancyList = Object.values(constancy);
+      const constancyList:{ 
+        title: string,
+        incomplete: number,
+        completed: number,
+        percent: number,
+        total: number  
+      }[] = Object.values(constancy);
 
-      const bestHabit = constancyList.reduce((prev:any, curr:any) => {
-        if (curr.completed > prev.completed || (curr.completed === prev.completed && curr.percent > prev.percent)) {
+      const bestHabit = constancyList.reduce((prev, curr) => {
+        if (!prev || curr.completed > prev.completed || (curr.completed === prev.completed && curr.percent > prev.percent)) {
           return curr;
         }
         return prev;
+      },{
+        title: '',
+        completed: 0,
+        incomplete: 0,
+        percent: 0,
+        total: 0
       });
+      
+
+     /*  let bestHabit = {title: '', percent: 0} */
     
       return res.status(201).json({possibleHabits, habitCompleted, habitsIncompleted, constancyList, bestHabit});
     
@@ -217,50 +239,4 @@ export default async function handler(
     }
   }
 
-  /*
-    BEST HABITS
 
-    - Quantas vezes o hábito se repete na semana
-    - Quantas semanas já se passaram contando a semanda de criação
-      obs: A multiplicação do resultado das duas buscas vai me dá o total de dias que 
-      o hábito estave disponível.
-      
-    - Quantas vezes esse hábito foi marcado como concluído vai me da a quantidade
-      de hábitos concluidos
-    
-    - O melhor hábito é aquele que tem a maior constância e a maior quantidades de
-      hábitos concluidos.
-  */
-
-
-
-  /* const searchSpacingTimeDateHabits:[] = await prisma.$queryRaw`
-        SELECT H.title,
-          cast(count(DH.completed) as float) AS habits_completed,
-          cast(COUNT(*) as float) AS total_habits,
-          cast((COUNT(DH.completed)::float / COUNT(*)::float) * 100 as float) AS consistency
-          FROM "User" U
-            LEFT JOIN
-              "Habit" H ON U.id = H."userId"
-            LEFT JOIN
-              "DayHabit" DH ON H.id = DH."habit_id"
-          WHERE U.id = ${user?.id}
-          GROUP BY H.title;
-      `;
-        
-      const spacingTimeDateHabits = searchSpacingTimeDateHabits.map((item:IBestHabit) => {
-          const title =  item.title;
-          const percent = item.consistency
-
-          return {
-              title, percent
-          };
-      });
-
-      let bestHabit = { title: '', percent: 0 }
-
-      spacingTimeDateHabits.map(habit => {
-        if(habit.percent >= bestHabit.percent){
-            bestHabit = habit
-        }  
-      }); */

@@ -177,7 +177,7 @@ export function HabitsProvider({children}:IHabitsProvider){
 
     async function httpInfo(){
       await api.post('/server/info');
-      await api.post('server/bestHabit');
+      await api.post('/server/bestHabit');
     }
     
 
@@ -215,7 +215,7 @@ export function HabitsProvider({children}:IHabitsProvider){
           });
 
           await api.post('/server/info');
-          await api.post('server/bestHabit');
+          await api.post('/server/bestHabit');
           handleDaysCompleted();
 
           closeModal();
