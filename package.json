@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@next-auth/prisma-adapter": "^1.0.6",
-    "@prisma/client": "^4.13.0",
+    "@prisma/client": "^4.15.0",
     "@svgr/webpack": "^8.0.1",
     "@types/node": "18.16.3",
     "@types/react": "18.2.0",
@@ -30,6 +30,6 @@
   "devDependencies": {
     "@types/cookies": "^0.7.7",
     "@types/react-modal": "^3.16.0",
-    "prisma": "^4.13.0"
+    "prisma": "^4.15.0"
   }
 }

@@ -154,7 +154,6 @@ export function HabitsProvider({children}:IHabitsProvider){
       });
       
       await api.post('/server/info');
-      await api.post('server/bestHabit');
       
       handleDaysCompleted();
       fetchHabits();
@@ -175,10 +174,7 @@ export function HabitsProvider({children}:IHabitsProvider){
       setHabits(response.data);
     }
 
-    async function httpInfo(){
-      await api.post('/server/info');
-      await api.post('/server/bestHabit');
-    }
+    
     
 
     useEffect(()=>{
@@ -191,7 +187,6 @@ export function HabitsProvider({children}:IHabitsProvider){
         })
 
         fetchHabits();
-        httpInfo();
         handleCountProgress()
         setProgress(Number((countCompleted*100)/count))
         handleHabitComplet()
@@ -215,7 +210,6 @@ export function HabitsProvider({children}:IHabitsProvider){
           });
 
           await api.post('/server/info');
-          await api.post('/server/bestHabit');
           handleDaysCompleted();
 
           closeModal();

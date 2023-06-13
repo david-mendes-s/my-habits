@@ -12,8 +12,6 @@ import timezone from 'dayjs/plugin/timezone';
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
-
-
 export default async function handler(
     req: NextApiRequest,
     res: NextApiResponse
@@ -39,95 +37,95 @@ export default async function handler(
             }
         });
 
-        const data = dayjs.tz(new Date(), 'America/Sao_Paulo').startOf('day').toDate();
+       // try{
+          const data = dayjs.tz(new Date(), 'America/Sao_Paulo').startOf('day').toDate();
       
-        const weekDay = data.getDay();
-        // todos hábitos possiveis
-        const possibleHabits = await prisma.habit.findMany({
-            where: {
-              created_at: {
-                lte: data,
-              },
-              weekDays: {
-                some: {
-                  week_day: weekDay
-                }
-              },
-              user: {
-                id: user?.id
-              },
-            },
-  
-            include: {
-              DayHabit: {
-                where: {
-                  day: {
-                    date: data.toISOString(),
+          const weekDay = data.getDay();
+          // todos hábitos possiveis
+          const possibleHabits = await prisma.habit.findMany({
+              where: {
+                created_at: {
+                  lte: data,
+                },
+                weekDays: {
+                  some: {
+                    week_day: weekDay
                   }
-                }
+                },
+                user: {
+                  id: user?.id
+                },
               },
-            }
-          });
+    
+              include: {
+                DayHabit: {
+                  where: {
+                    day: {
+                      date: data.toISOString(),
+                    }
+                  }
+                },
+              }
+            });
+            
+          const progresso = possibleHabits.map(habit => {
+              if(habit.DayHabit.length <= 0){
+                  return false;
+              }else {
+                  return true;
+              }
+          }).filter(habitCompleted => habitCompleted === true);
+ 
+          //Verificar se dia já existe
           
-        const progresso = possibleHabits.map(habit => {
-            if(habit.DayHabit.length <= 0){
-                return false;
-            }else {
-                return true;
-            }
-        }).filter(habitCompleted => habitCompleted === true);
-
-
-        //Verificar se dia já existe
-
-        
-        console.log("total: "+progresso.length)
-
-        const seacherProgressToday = await prisma.progress.findFirst({
+       
+          const seacherProgressToday = await prisma.progress.findFirst({
             where: {
                 date_completed_habit: data.toISOString(),
                 userId: user?.id
             }
+          })
+             
+    
+          let progress_habits = (progresso.length / possibleHabits.length) * 100;
 
-        })
-           
-        console.log("total: "+seacherProgressToday?.date_completed_habit)
-        //Criação e atualização do progresso
-       
-        if(totalHabitos > 0){
-        
-        if(seacherProgressToday?.date_completed_habit !== data.toISOString()){
+          console.log(!seacherProgressToday);
+
+          if(seacherProgressToday === null){
             await prisma.progress.create({
-                data: {
-                    progress_habit: (progresso.length / possibleHabits.length) * 100 || 0,
-                    date_completed_habit: data.toISOString(),
-                    week_day: data.getDay(),
-                    habitsCompleteds: progresso.length,
-                    possibleHabitsDay: possibleHabits.length,
-                    userId: user?.id!
-                }
+              data: {
+                  progress_habit: Number(progress_habits.toFixed()) || 0,
+                  date_completed_habit: data.toISOString(),
+                  week_day: data.getDay(),
+                  habitsCompleteds: progresso.length,
+                  possibleHabitsDay: possibleHabits.length,
+                  userId: user?.id!
+              },
+              
             });
-            
-        }else{
-        
-            await prisma.progress.update({
-                where: {
-                    id: seacherProgressToday?.id
-                },
-                data: {
-                    progress_habit: (progresso.length / possibleHabits.length) * 100 || 0,
-                    date_completed_habit: data.toISOString(),
-                    week_day: data.getDay(),
-                    habitsCompleteds: progresso.length,
-                    possibleHabitsDay: possibleHabits.length,
-                }
+          }else{
+            await prisma.progress.delete({
+              where: {
+                id: seacherProgressToday?.id
+              }
             })
-        
-            
-        }
-        
-        }
-        return res.status(200).json({message: 'created sussess'});
+
+            await prisma.progress.create({
+              data: {
+                  progress_habit: Number(progress_habits.toFixed()) || 0,
+                  date_completed_habit: data.toISOString(),
+                  week_day: data.getDay(),
+                  habitsCompleteds: progresso.length,
+                  possibleHabitsDay: possibleHabits.length,
+                  userId: user?.id!
+              }
+            });
+
+          }
+
+          
+        return res.status(200).json({message: 'created sucess'});
+
     }else if(req.method === 'GET'){
         const session = await getServerSession(req, res, authOptions);
         
@@ -194,7 +192,8 @@ export default async function handler(
                 return true;
             }
         }).filter(habitCompleted => habitCompleted === true);
-    
+
+
         //Lista de progresso
        const progressMany = await prisma.progress.findMany({
         where: {
@@ -245,11 +244,7 @@ export default async function handler(
             repositoryConstanceMedia = repositoryConstanceMedia + progress.progress_habit;
         });
 
-        let constanceMedia = repositoryConstanceMedia/copyByprogressManyForConstance.length
-
-        //Melhor Hábito
-
-        
+        let constanceMedia = repositoryConstanceMedia/copyByprogressManyForConstance.length;
 
         //Avaliação por emoji: Média das Constâncias por dia da semana
 

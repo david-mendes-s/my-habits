@@ -11,20 +11,6 @@ import { IncompleteHabit } from "@prisma/client";
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
-interface IConstancy {
-    habit_id: string,
-    title: string,
-    incomplete: number,
-    completed: number,
-    percent: number,
-    total: number  
-}
-interface IBestHabit {
-    "title": string,
-    "habits_completed": number,
-    "total_habits": number,
-    "consistency": number
-}
 
 export default async function handler(
     req: NextApiRequest,
@@ -135,7 +121,7 @@ export default async function handler(
       }[] = Object.values(constancy);
 
       const bestHabit = constancyList.reduce((prev, curr) => {
-        if (!prev || curr.completed > prev.completed || (curr.completed === prev.completed && curr.percent > prev.percent)) {
+        if (!prev || curr.completed >= prev.completed || (curr.completed === prev.completed && curr.percent >= prev.percent)) {
           return curr;
         }
         return prev;
@@ -148,9 +134,16 @@ export default async function handler(
       });
       
 
-     /*  let bestHabit = {title: '', percent: 0} */
+     //constância mêdia
+     let constancyMedia = 0;
+     
+     constancyList.forEach(habit => {
+      constancyMedia += habit.percent
+     })
+
+     constancyMedia /= constancyList.length;
     
-      return res.status(201).json({possibleHabits, habitCompleted, habitsIncompleted, constancyList, bestHabit});
+      return res.status(201).json({constancyList, bestHabit, constancyMedia});
     
     }else if(req.method === 'POST'){
 
@@ -208,7 +201,6 @@ export default async function handler(
 
       filterHabitsIncomplete.map(async (habit) => {
         
-
         await prisma.incompleteHabit.upsert({
           create: {
             habit_id: habit.id,
